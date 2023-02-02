@@ -10,13 +10,15 @@ int main() {
 	}*/
 	
 	cv::Mat capture {cv::imread("tempimage.png")};
-
 	cv::Mat frame{};
-	std::vector<cv::Point>points {eboard::getPoints(capture)};
+
+	std::vector<cv::Point2f>points {eboard::getPoints(capture)};
 	if (points.size() != 4)
 	{
 		return 1;
 	}
+
+	cv::Mat correctPerspective{ eboard::warpPerspective(points, capture) };
 
 	while (true)
 	{
