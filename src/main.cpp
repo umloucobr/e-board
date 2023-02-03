@@ -1,7 +1,7 @@
 #include "e-board.hpp"
 
 int main() {
-	//cv::namedWindow("mainwindow", cv::WINDOW_AUTOSIZE);
+	cv::namedWindow("mainwindow", cv::WINDOW_AUTOSIZE);
 	/*cv::VideoCapture capture{"tempimage.png"};
 	if (!capture.isOpened())
 	{
@@ -9,16 +9,27 @@ int main() {
 		return 1;
 	}*/
 	
-	cv::Mat capture {cv::imread("tempimage.png")};
+	cv::Mat capture {cv::imread("1.jpeg")};
 	cv::Mat frame{};
 
-	std::vector<cv::Point2f>points {eboard::getPoints(capture)};
+	std::vector<cv::Point2f>points {eboard::getPoints(capture)}; //Get points for the warp.
 	if (points.size() != 4)
 	{
 		return 1;
 	}
 
-	cv::Mat correctPerspective{ eboard::warpPerspective(points, capture) };
+	cv::Mat correctPerspective {eboard::warpPerspective(points, capture)}; //Warp.
+	std::vector<cv::Point2f> corners {eboard::getSquares(correctPerspective)}; //Get the corners inside the board.
+
+	bool movement {false};
+	auto backSub {cv::createBackgroundSubtractorMOG2()};
+	backSub->setBackgroundRatio(0.5);
+	
+	while (cv::waitKey(20) != 27)
+	{
+		cv::imshow("mainwindow", correctPerspective);
+	}
+	cv::destroyAllWindows();
 
 	while (true)
 	{
@@ -30,4 +41,5 @@ int main() {
 		}*/
 
 	}
+	return 0;
 }
