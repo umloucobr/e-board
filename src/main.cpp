@@ -2,44 +2,67 @@
 
 int main() {
 	cv::namedWindow("mainwindow", cv::WINDOW_AUTOSIZE);
-	/*cv::VideoCapture capture{"tempimage.png"};
-	if (!capture.isOpened())
+	cv::Mat frame {cv::imread("1.jpeg")};
+	//cv::VideoCapture capture{"1.mp4"};
+	/*if (!capture.isOpened())
 	{
 		std::cerr << "Could not open video!\n";
 		return 1;
 	}*/
 	
-	cv::Mat capture {cv::imread("1.jpeg")};
-	cv::Mat frame{};
+	//cv::Mat frame{};
+	bool getPoints {true};
+	bool getCorners {true};
+	std::vector<cv::Point2f> points{};
+	std::vector<cv::Point2f> corners{};
 
-	std::vector<cv::Point2f>points {eboard::getPoints(capture)}; //Get points for the warp.
-	if (points.size() != 4)
-	{
-		return 1;
-	}
+	//cv::Mat background {};
+	//cv::Mat foregroundMask{};
 
-	cv::Mat correctPerspective {eboard::warpPerspective(points, capture)}; //Warp.
-	std::vector<cv::Point2f> corners {eboard::getSquares(correctPerspective)}; //Get the corners inside the board.
-
-	bool movement {false};
-	auto backSub {cv::createBackgroundSubtractorMOG2()};
-	backSub->setBackgroundRatio(0.5);
-	
-	while (cv::waitKey(20) != 27)
-	{
-		cv::imshow("mainwindow", correctPerspective);
-	}
-	cv::destroyAllWindows();
+	//bool movement {false};
+	//auto backSub {cv::createBackgroundSubtractorMOG2()};
+	//backSub->setBackgroundRatio(0.5);
 
 	while (true)
 	{
-		/*capture >> frame;
-		if (frame.empty())
-		{
-			std::cerr << "Blank frame.\n";
-			return 1;
-		}*/
+		//capture >> frame;
+		//if (frame.empty())
+		//{
+			//std::cout << "Blank frame.\n";
+			//return 0;
+		//}
 
+		if (getPoints)
+		{
+			points = eboard::getPoints(frame); //Get points for the warp.
+			if (points.size() != 4)
+			{
+				return 1;
+			}
+
+			getPoints = false;
+		}
+
+		cv::Mat correctPerspective {eboard::warpPerspective(points, frame)}; //Warp.
+
+		if (getCorners)
+		{
+			corners = eboard::getCorners(correctPerspective); //Get the corners inside the board.
+			getCorners = false;
+		}
+
+		//backSub->apply(correctPerspective, foregroundMask);
+		//backSub->getBackgroundImage(background);
+
+		//std::vector<cv::Rect> rectList{};
+
+		eboard::drawCorners(correctPerspective, corners);
+
+		if (cv::waitKey(20) != 27)
+		{
+			cv::imshow("mainwindow", correctPerspective);
+		}
 	}
+	cv::destroyAllWindows();
 	return 0;
 }
